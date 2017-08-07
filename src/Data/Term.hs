@@ -41,6 +41,7 @@ hasName ctx x = isJust $ find (\c -> fst c == x) ctx
 indexToName :: Info -> Context -> Int -> String
 indexToName info ctx x = fst $ ctx !! x
 
+-- Shift the variables in the given term by `d`
 termShift :: Int -> Term -> Term
 termShift d = walk 0
   where
@@ -48,7 +49,21 @@ termShift d = walk 0
     walk c t = case t of
       Var info x n
         | x < c -> Var info x (n + d)
-        | x >= c -> Var info (x + d) (n + d)
+        | otherwise -> Var info (x + d) (n + d)
+      App info t1 t2 ->
+        App info (walk c t1) (walk c t2)
+      Abs info x t1 ->
+        Abs info x $ walk (c + 1) t1
+
+-- Substitute the `j`th variable to term `s` in term `t`
+termSubstitute :: Int -> Term -> Term -> Term
+termSubstitute j s = walk 0
+  where
+    walk :: Int -> Term -> Term
+    walk c t = case t of
+      Var info x n
+        | x == j + c -> termShift c s
+        | otherwise -> t
       App info t1 t2 ->
         App info (walk c t1) (walk c t2)
       Abs info x t1 ->
