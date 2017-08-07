@@ -40,3 +40,16 @@ hasName ctx x = isJust $ find (\c -> fst c == x) ctx
 
 indexToName :: Info -> Context -> Int -> String
 indexToName info ctx x = fst $ ctx !! x
+
+termShift :: Int -> Term -> Term
+termShift d = walk 0
+  where
+    walk :: Int -> Term -> Term
+    walk c t = case t of
+      Var info x n
+        | x < c -> Var info x (n + d)
+        | x >= c -> Var info (x + d) (n + d)
+      App info t1 t2 ->
+        App info (walk c t1) (walk c t2)
+      Abs info x t1 ->
+        Abs info x $ walk (c + 1) t1
