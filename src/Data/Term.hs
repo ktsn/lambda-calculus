@@ -68,3 +68,9 @@ termSubstitute j s = walk 0
         App info (walk c t1) (walk c t2)
       Abs info x t1 ->
         Abs info x $ walk (c + 1) t1
+
+-- Beta reduction
+-- Apply term `s` to term `t`
+betaReduction :: Term -> Term -> Term
+betaReduction s t =
+  termShift (-1) $ termSubstitute 0 (termShift 1 s) t
