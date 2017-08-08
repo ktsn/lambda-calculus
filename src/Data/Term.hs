@@ -75,10 +75,9 @@ termSubstitute j s = walk 0
       Abs info x t1 ->
         Abs info x $ walk (c + 1) t1
 
--- Beta reduction
 -- Apply term `s` to term `t`
-betaReduction :: Term -> Term -> Term
-betaReduction s t =
+termSubstituteTop :: Term -> Term -> Term
+termSubstituteTop s t =
   termShift (-1) $ termSubstitute 0 (termShift 1 s) t
 
 isVal :: Context -> Term -> Bool
@@ -89,7 +88,7 @@ isVal _ _ = False
 eval1 :: Context -> Term -> Either EvalError Term
 eval1 ctx t = case t of
   App info (Abs _ x t12) v2 | isVal ctx v2 ->
-    Right $ betaReduction v2 t12
+    Right $ termSubstituteTop v2 t12 -- beta reduction
   App info v1 t2 | isVal ctx v1 -> do
     t2' <- eval1 ctx t2
     Right $ App info v1 t2'
