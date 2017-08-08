@@ -2,6 +2,7 @@ module Data.Term where
 
 import Data.List (find, (!!))
 import Data.Maybe (isJust)
+import Data.Either (Either(..))
 
 newtype Info = Info Int
 
@@ -13,6 +14,8 @@ data Term
 data Binding = NameBind
 
 type Context = [(String, Binding)]
+
+data EvalError = NoRuleApplies
 
 printTerm :: Context -> Term -> String
 printTerm ctx t = case t of
@@ -74,3 +77,27 @@ termSubstitute j s = walk 0
 betaReduction :: Term -> Term -> Term
 betaReduction s t =
   termShift (-1) $ termSubstitute 0 (termShift 1 s) t
+
+isVal :: Context -> Term -> Bool
+isVal _ Abs{} = True
+isVal _ _ = False
+
+-- One step evaluation
+eval1 :: Context -> Term -> Either EvalError Term
+eval1 ctx t = case t of
+  App info (Abs _ x t12) v2 | isVal ctx v2 ->
+    Right $ betaReduction v2 t12
+  App info v1 t2 | isVal ctx v1 -> do
+    t2' <- eval1 ctx t2
+    Right $ App info v1 t2'
+  App info t1 t2 -> do
+    t1' <- eval1 ctx t1
+    Right $ App info t1' t2
+  _ ->
+    Left NoRuleApplies
+
+-- Multi-step evaluation
+eval :: Context -> Term -> Term
+eval ctx t = case eval1 ctx t of
+  Right t' -> eval ctx t'
+  Left _ -> t
