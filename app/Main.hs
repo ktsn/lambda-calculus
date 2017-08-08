@@ -6,10 +6,11 @@ info = Info 10
 
 tree :: Term
 tree
-  = App info
-    ( Abs info "x"
-      $ Var info 0 2 )
-    ( Var info 0 1 )
+  = Abs info "x"
+    $ App info
+      ( Abs info "x"
+        $ Var info 0 2 )
+      ( Var info 0 1 )
 
 main :: IO ()
-main = putStrLn $ printTerm [("x", NameBind)] tree
+main = print tree

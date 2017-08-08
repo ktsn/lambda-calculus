@@ -6,16 +6,19 @@ import Data.Either (Either(..))
 
 newtype Info = Info Int
 
-data Term
-  = Var Info Int Int
-  | Abs Info String Term
-  | App Info Term Term
-
 data Binding = NameBind
 
 type Context = [(String, Binding)]
 
 data EvalError = NoRuleApplies
+
+data Term
+  = Var Info Int Int
+  | Abs Info String Term
+  | App Info Term Term
+
+instance Show Term where
+  show = printTerm []
 
 printTerm :: Context -> Term -> String
 printTerm ctx t = case t of
